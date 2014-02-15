@@ -2,17 +2,15 @@
     if (!'Notification' in window || !'localStorage' in window) {
         return;
     }
-    
-    var storage = window.localStorage;
-    
-    console.log('should notify!');
-    
+
+    var storage = window.localStorage,
+        known_ids = JSON.parse(storage.getItem('studip-notifications') || '[]');
+
     function Notify(text, url) {
         var spawn = function () {
-            console.log('spawning notification');
-            var notification = new Notification(text, {
+            var notification = new Notification('Nachricht von Stud.IP', {
                 icon: STUDIP.ASSETS_URL + 'images/touch-icon-ipad3.png',
-                body: 'foooooooo'
+                body: text
             });
             if (url) {
                 notification.onclick = function () {
@@ -35,19 +33,13 @@
             })
         }
     }
-    
-    var known_ids = JSON.parse(storage.getItem('studip-notifications') || '[]');
-    
+
     STUDIP.PersonalNotifications.update = function () {
-        console.log('update');
-        
         OldUpdate();
 
         $('#notification_list li').each(function () {
             var id = $(this).data().id;
             if (known_ids.indexOf(id) === -1) {
-                console.log('unknown id');
-
                 var text = $(this).text().trim(),
                     url = $(this).find('a[href]').attr('href');
                 Notify(text, url);
@@ -61,9 +53,7 @@
     $(window).bind('storage', function (event) {
         event = event.originalEvent;
         if (event.key === 'studip-notifications') {
-            console.log('update known ids');
             known_ids = JSON.parse(event.newValue);
         }
     });
-    
 }(jQuery, STUDIP.PersonalNotifications.update));
